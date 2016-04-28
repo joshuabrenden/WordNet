@@ -1,14 +1,13 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class WordNet {
 
@@ -19,6 +18,11 @@ public class WordNet {
 
 	// constructor takes the name of the two input files
 	public WordNet(String synsets, String hypernyms) {
+		
+		if(synsets == null || hypernyms == null){
+			throw new NullPointerException("Error reading input.");
+		}
+		
 		synsetIds = new HashMap<Integer, String>();
 		nounIds = new HashMap<String, Set<Integer>>();
 
@@ -27,7 +31,7 @@ public class WordNet {
 
 		DirectedCycle directedCycle = new DirectedCycle(digraph);
 		if (directedCycle.hasCycle()) {
-
+			
 		}
 
 		shortestCommonAncestor = new ShortestCommonAncestor(digraph);
@@ -76,7 +80,7 @@ public class WordNet {
 			String[] synsetNouns = synset.split(",");
 			for (String synsetNoun : synsetNouns) {
 				Set<Integer> ids = nounIds.get(synsetNoun);
-				if (ids.isEmpty()) {
+				if (ids == null) {
 					ids = new HashSet<>();
 				}
 
@@ -113,5 +117,24 @@ public class WordNet {
 	// do unit testing of this class
 	public static void main(String[] args) {
 		WordNet wordNet = new WordNet(args[0], args[1]);
+		while (!StdIn.isEmpty()) {
+            String nounA = StdIn.readString();
+            String nounB = StdIn.readString();
+
+            if (!wordNet.isNoun(nounA)) {
+                StdOut.printf("%s is not a noun!\n", nounA);
+                continue;
+            }
+
+            if (!wordNet.isNoun(nounB)) {
+                StdOut.printf("%s is not a noun!\n", nounB);
+                continue;
+            }
+
+            int distance = wordNet.distance(nounA, nounB);
+            String ancestor = wordNet.sca(nounA, nounB);
+
+            StdOut.printf("distance = %d, ancestor = %s\n", distance, ancestor);
+        }
 	}
 }

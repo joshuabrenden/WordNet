@@ -1,3 +1,9 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdIn;
@@ -13,29 +19,88 @@ import edu.princeton.cs.algs4.StdOut;
  * */
 
 public class ShortestCommonAncestor {
+	private final Digraph digraph;
+
 	// constructor takes a rooted DAG as argument
 	public ShortestCommonAncestor(Digraph G) {
-
-	}
-
-	// length of shortest ancestral path between v and w
-	public int length(int v, int w) {
-		return 0;
+		digraph = G;
 	}
 
 	// a shortest common ancestor of vertices v and w
 	public int ancestor(int v, int w) {
-		return 0;
-	}
-
-	// length of shortest ancestral path of vertex subsets A and B
-	public int length(Iterable<Integer> subsetA, Iterable<Integer> subsetB) {
-		return 0;
+		return getAncestor(getBFDP(v), getBFDP(w));
 	}
 
 	// a shortest common ancestor of vertex subsets A and B
 	public int ancestor(Iterable<Integer> subsetA, Iterable<Integer> subsetB) {
-		return 0;
+		return getAncestor(getBFDP(subsetA), getBFDP(subsetB));
+	}
+
+	private int getAncestor(BreadthFirstDirectedPaths v, BreadthFirstDirectedPaths w) {
+		int shortestCommonAncestor = -1;
+		int minimumDistance = Integer.MAX_VALUE;
+		List<Integer> allAncestors = new ArrayList<>();
+
+		for (int i = 0; i < digraph.V(); i++) {
+			if (v.hasPathTo(i) && w.hasPathTo(i)) {
+				allAncestors.add(i);
+			}
+		}
+
+		for (Integer ancestor : allAncestors) {
+			int distance = v.distTo(ancestor) + w.distTo(ancestor);
+			if (distance < minimumDistance) {
+				minimumDistance = distance;
+				shortestCommonAncestor = ancestor;
+			}
+		}
+
+		return shortestCommonAncestor;
+	}
+
+	// length of shortest ancestral path between v and w
+	public int length(int v, int w) {
+		return getLength(getBFDP(v), getBFDP(w));
+	}
+
+	// length of shortest ancestral path of vertex subsets A and B
+	public int length(Iterable<Integer> subsetA, Iterable<Integer> subsetB) {
+		return getLength(getBFDP(subsetA), getBFDP(subsetB));
+	}
+
+	private int getLength(BreadthFirstDirectedPaths v, BreadthFirstDirectedPaths w) {
+		int length = -1;
+		int minimumDistance = Integer.MAX_VALUE;
+
+		List<Integer> allAncestors = new ArrayList<>();
+
+		for (int i = 0; i < digraph.V(); i++) {
+			if (v.hasPathTo(i) && w.hasPathTo(i)) {
+				allAncestors.add(i);
+			}
+		}
+
+		for (Integer ancestor : allAncestors) {
+			int distance = v.distTo(ancestor) + w.distTo(ancestor);
+			if (distance < minimumDistance) {
+				minimumDistance = distance;
+			}
+		}
+
+		if (Integer.MAX_VALUE == minimumDistance) {
+			length = -1;
+		} else {
+			length = minimumDistance;
+		}
+		return length;
+	}
+
+	private BreadthFirstDirectedPaths getBFDP(int value) {
+		return new BreadthFirstDirectedPaths(digraph, value);
+	}
+
+	private BreadthFirstDirectedPaths getBFDP(Iterable<Integer> value) {
+		return new BreadthFirstDirectedPaths(digraph, value);
 	}
 
 	// do unit testing of this class
