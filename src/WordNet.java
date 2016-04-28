@@ -1,30 +1,41 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 public class WordNet {
 
-    private final Map<Integer, String> synsetIds;
-    private final Map<String, Set<Integer>> nounIds;
-	
+	private final Map<Integer, String> synsetIds;
+	private final Map<String, Set<Integer>> nounIds;
+	private final Digraph digraph;
+	private final ShortestCommonAncestor shortestCommonAncestor;
+
 	// constructor takes the name of the two input files
 	public WordNet(String synsets, String hypernyms) {
-		synsetIds = new HashMap<Integer,String>();
+		synsetIds = new HashMap<Integer, String>();
 		nounIds = new HashMap<String, Set<Integer>>();
-		
-		
-		readSynsets(synsets);
+
+		int synsetCount = readSynsets(synsets);
+		digraph = readHypernym(hypernyms, synsetCount);
+
+		DirectedCycle directedCycle = new DirectedCycle(digraph);
+		if (directedCycle.hasCycle()) {
+
+		}
+
+		shortestCommonAncestor = new ShortestCommonAncestor(digraph);
 	}
 
 	// all WordNet nouns
 	public Iterable<String> nouns() {
-		return null;
+		return nounIds.keySet();
 	}
 
 	/*
@@ -32,7 +43,7 @@ public class WordNet {
 	 * the number of nouns.
 	 */
 	public boolean isNoun(String word) {
-		return true;
+		return nounIds.containsKey(word);
 	}
 
 	/*
@@ -41,7 +52,7 @@ public class WordNet {
 	 * ancestor().
 	 */
 	public String sca(String noun1, String noun2) {
-		return null;
+		return synsetIds.get(shortestCommonAncestor.ancestor(nounIds.get(noun1), nounIds.get(noun2)));
 	}
 
 	/*
@@ -49,28 +60,54 @@ public class WordNet {
 	 * length().
 	 */
 	public int distance(String noun1, String noun2) {
-		return 0;
-	}
-
-	public Digraph readHypernyms(String hypernyms) {
-
-		return null;
+		return shortestCommonAncestor.length(nounIds.get(noun1), nounIds.get(noun2));
 	}
 
 	private int readSynsets(String synsets) {
 		In synsetsFile = new In(synsets);
-		
-		//Might be over-complicating this.
-		List<String> allLines = new ArrayList<String>(Arrays.asList(synsetsFile.readAllLines()));
+		int count = 0;
 
-		allLines.stream() //
-				.forEach(line -> synsetIds.put(Integer.valueOf(line.split(",")[0]), line.split(",")[1]));
-		
-		for(int i = 0; i < synsetIds.size(); i++){
-			System.out.println(synsetIds.get(i).toString());
+		while (synsetsFile.hasNextLine()) {
+			String[] line = synsetsFile.readLine().split(",");
+			Integer id = Integer.valueOf(line[0]);
+			String synset = line[1];
+			synsetIds.put(id, synset);
+
+			String[] synsetNouns = synset.split(",");
+			for (String synsetNoun : synsetNouns) {
+				Set<Integer> ids = nounIds.get(synsetNoun);
+				if (ids.isEmpty()) {
+					ids = new HashSet<>();
+				}
+
+				ids.add(id);
+				nounIds.put(synsetNoun, ids);
+				count++;
+			}
 		}
-		
-		return 0;
+		/*
+		 * for(int i = 0; i < synsetIds.size(); i++){
+		 * System.out.println(synsetIds.get(i).toString()); }
+		 */
+
+		return count;
+	}
+
+	private Digraph readHypernym(String hypernyms, int count) {
+		In hypernymsFile = new In(hypernyms);
+		Digraph digraph = new Digraph(count);
+
+		while (hypernymsFile.hasNextLine()) {
+			String[] line = hypernymsFile.readLine().split(",");
+			Integer id = Integer.valueOf(line[0]);
+
+			for (int i = 1; i < line.length; i++) {
+				int hypernym = Integer.valueOf(line[i]);
+				digraph.addEdge(id, hypernym);
+			}
+		}
+
+		return digraph;
 	}
 
 	// do unit testing of this class
