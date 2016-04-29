@@ -1,5 +1,7 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,11 +20,11 @@ public class WordNet {
 
 	// constructor takes the name of the two input files
 	public WordNet(String synsets, String hypernyms) {
-		
-		if(synsets == null || hypernyms == null){
+
+		if (synsets == null || hypernyms == null) {
 			throw new NullPointerException("Error reading input.");
 		}
-		
+
 		synsetIds = new HashMap<Integer, String>();
 		nounIds = new HashMap<String, Set<Integer>>();
 
@@ -31,7 +33,7 @@ public class WordNet {
 
 		DirectedCycle directedCycle = new DirectedCycle(digraph);
 		if (directedCycle.hasCycle()) {
-			
+
 		}
 
 		shortestCommonAncestor = new ShortestCommonAncestor(digraph);
@@ -117,24 +119,35 @@ public class WordNet {
 	// do unit testing of this class
 	public static void main(String[] args) {
 		WordNet wordNet = new WordNet(args[0], args[1]);
-		while (!StdIn.isEmpty()) {
-            String nounA = StdIn.readString();
-            String nounB = StdIn.readString();
 
-            if (!wordNet.isNoun(nounA)) {
-                StdOut.printf("%s is not a noun!\n", nounA);
-                continue;
-            }
+		In file = new In(args[0]);
+		List<String> nouns1 = new ArrayList<String>();
+		List<String> nouns2 = new ArrayList<String>();
 
-            if (!wordNet.isNoun(nounB)) {
-                StdOut.printf("%s is not a noun!\n", nounB);
-                continue;
-            }
+		while (file.hasNextLine()) {
+			String[] line = file.readLine().split(",");
+			String noun = line[1];
+			nouns1.add(noun);
+			nouns2.add(noun);
+		}
+		
+		long startTime = System.currentTimeMillis();
+		int count = 0;
+		for (String n1 : nouns1) {
+			// String n1 = nouns1.get(i);
+			String n2 = nouns2.get(1);
 
-            int distance = wordNet.distance(nounA, nounB);
-            String ancestor = wordNet.sca(nounA, nounB);
+			int distance = wordNet.distance(n1, n2);
+			String ancestor = wordNet.sca(n1, n2);
 
-            StdOut.printf("distance = %d, ancestor = %s\n", distance, ancestor);
-        }
+			System.out.println("Distance from " + n1 + " to " + n2 + ": " + distance);
+			System.out.println("SCA of " + n1 + " and " + n2 + ": " + ancestor);
+			count++;
+		}
+
+		long endTime = System.currentTimeMillis();
+		long totalTime = endTime - startTime;
+		System.out.println(count + " computations in " + totalTime + "ms.");
+
 	}
 }
