@@ -21,23 +21,54 @@ public class WordNet {
 
 	// constructor takes the name of the two input files
 	public WordNet(String synsets, String hypernyms) {
-
+		
+		//Throws exception if either of the arguments are null
 		if (synsets == null || hypernyms == null) {
 			throw new NullPointerException("Error reading input.");
 		}
-
+		
 		synsetIds = new HashMap<Integer, String>();
 		nounIds = new HashMap<String, Set<Integer>>();
 
+		//Creates the maps based off of the synset and hypernym files
 		int synsetCount = readSynsets(synsets);
+		
+		//Creates the Digraph based off the hypernyms file and number of synsets.
 		digraph = readHypernym(hypernyms, synsetCount);
 
+		//Throws an exception if a cycle is detected. Used the default cycle
+		//detecting method given in the DirectedCycle class.
 		DirectedCycle directedCycle = new DirectedCycle(digraph);
 		if (directedCycle.hasCycle()) {
 			throw new IllegalArgumentException("Cycle Detected.");
 		}
+		
+		//Throws an exception if the digraph is not singly rooted.
+		if(!isRooted(digraph)){
+			throw new IllegalArgumentException("Digraph is not rooted.");
+		}
 
+		//Finally, finds the shortest common ancestor
 		shortestCommonAncestor = new ShortestCommonAncestor(digraph);
+	}
+	
+	private boolean isRooted(Digraph digraph){
+		boolean isRooted = false;
+		int rootCount = 0;
+		if(digraph == null){
+			throw new NullPointerException("Digraph is null.");
+		} else {
+			for(int i = 0; i < digraph.V(); i++){
+				rootCount++;
+			}
+		}
+		
+		//If only a single root exists, then the digraph is properly rooted
+		if(rootCount == 1){
+			isRooted = true;
+		}
+		
+		return isRooted;
 	}
 
 	// all WordNet nouns
@@ -75,10 +106,12 @@ public class WordNet {
 		In synsetsFile = new In(synsets);
 		int count = 0;
 
+		//Iterates through the entire synsets file, adding to data the map structures
 		while (synsetsFile.hasNextLine()) {
 			String[] line = synsetsFile.readLine().split(",");
 			Integer id = Integer.valueOf(line[0]);
 			String synset = line[1];
+			//Adds the id and the synset to the synsetIds map
 			synsetIds.put(id, synset);
 
 			String[] synsetNouns = synset.split(",");
