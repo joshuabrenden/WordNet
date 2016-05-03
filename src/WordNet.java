@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
@@ -33,7 +34,7 @@ public class WordNet {
 
 		DirectedCycle directedCycle = new DirectedCycle(digraph);
 		if (directedCycle.hasCycle()) {
-
+			throw new IllegalArgumentException("Cycle Detected.");
 		}
 
 		shortestCommonAncestor = new ShortestCommonAncestor(digraph);
@@ -49,7 +50,7 @@ public class WordNet {
 	 * the number of nouns.
 	 */
 	public boolean isNoun(String word) {
-		return nounIds.containsKey(word);
+		return word == null ? false : nounIds.containsKey(word);
 	}
 
 	/*
@@ -69,6 +70,7 @@ public class WordNet {
 		return shortestCommonAncestor.length(nounIds.get(noun1), nounIds.get(noun2));
 	}
 
+	//Reads the synsets.txt file and adds it to the map
 	private int readSynsets(String synsets) {
 		In synsetsFile = new In(synsets);
 		int count = 0;
@@ -91,14 +93,11 @@ public class WordNet {
 				count++;
 			}
 		}
-		/*
-		 * for(int i = 0; i < synsetIds.size(); i++){
-		 * System.out.println(synsetIds.get(i).toString()); }
-		 */
-
+		
 		return count;
 	}
-
+	
+	//Reads the hypernyms.txt file and adds data to the digraph
 	private Digraph readHypernym(String hypernyms, int count) {
 		In hypernymsFile = new In(hypernyms);
 		Digraph digraph = new Digraph(count);
@@ -131,11 +130,12 @@ public class WordNet {
 			nouns2.add(noun);
 		}
 		
+		//Iterates through every synset and compares with a random other synset.
 		long startTime = System.currentTimeMillis();
 		int count = 0;
 		for (String n1 : nouns1) {
-			// String n1 = nouns1.get(i);
-			String n2 = nouns2.get(1);
+			int randIndex = ThreadLocalRandom.current().nextInt(1, nouns1.size());
+			String n2 = nouns2.get(randIndex);
 
 			int distance = wordNet.distance(n1, n2);
 			String ancestor = wordNet.sca(n1, n2);
