@@ -9,14 +9,21 @@
  *  information in synsets.txt. Why did you make this choice?
  *****************************************************************************/
 
-
+I chose to store the information in synsets.txt in two HashMap data structures.
+One HashMap, synsetIds, has an integer id and a string. The other HashMap, nounIds has
+an string which is the synset and a set of other noins which are related to the synset.
+I made this choice because a HashMap is an efficient data structure to add lots of
+synsets to and it is also efficient when performing lookups. 
 
 /******************************************************************************
  *  Describe concisely the data structure(s) you used to store the 
  *  information in hypernyms.txt. Why did you make this choice?
  *****************************************************************************/
 
-
+I chose to store the information in hypernyms.txt in a Digraph data structure.
+This data structure has many built in methods, such as the addEdge function,
+making it simple to add an edge with an id and a hypernym. The Digraph class is 
+well suited for working with the hypernyms.
 
 /******************************************************************************
  *  Describe concisely the algorithm you use in the constructor of
@@ -28,7 +35,12 @@
 
 Description:
 
-
+The SCA constructor is passed a Digraph object as an argument, which is the digraph
+used in the SCA class. Next each vertex in the graph is iterated though, and ones with
+empty adjacency lists are added. Once a vertex is added, it becomes the root. If there 
+are multiple roots, an exception is thrown. If we don't find any vertexes with an empty 
+adjacency list, then the graph is not acyclic and an exception is also thrown. Using the
+DirectedCycle class for detecting cycles, we check for cycles in he digraph.
 
 Order of growth of running time:
 
@@ -50,51 +62,7 @@ Order of growth of running time:
 
 Description:
 
-                                              running time
-method                               best case            worst case
-------------------------------------------------------------------------
-length(int v, int w)
-
-ancestor(int v, int w)
-
-length(Iterable<Integer> v,
-       Iterable<Integer> w)
-
-ancestor(Iterable<Integer> v,
-         Iterable<Integer> w)
-
-
-
-
-/******************************************************************************
- *  Known bugs / limitations.
- *****************************************************************************/
-
-
-/******************************************************************************
- *  Describe whatever help (if any) that you received.
- *  Don't include readings, lectures, and precepts, but do
- *  include any help from people (including course staff, lab TAs,
- *  classmates, and friends) and attribute them by name.
- *****************************************************************************/
-
-
-/******************************************************************************
- *  Describe any serious problems you encountered.                    
- *****************************************************************************/
-
-
-/******************************************************************************
- *  If you worked with a partner, assert below that you followed
- *  the protocol as described on the assignment page. Give one
- *  sentence explaining what each of you contributed.
- *****************************************************************************/
-
-
-
-
-/******************************************************************************
- *  List any other comments here. Feel free to provide any feedback   
- *  on how much you learned from doing the assignment, and whether    
- *  you enjoyed doing it.                                             
- *****************************************************************************/
+The algorithm for computing the shortest common ancestor is done by receiving the 
+two nouns, v and w and iterates through the paths where it finds common ancestors.
+After this the paths are compared and the shortest one is used. If they are equal
+then the higher value is used.
